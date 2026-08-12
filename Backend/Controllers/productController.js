@@ -19,27 +19,40 @@ const createProduct = asyncHandler(async (req,res)=>{
 });
 
 
-const getProducts = asyncHandler(async (req,res)=>{
-    const pageSize = 12;
-    const page = Number(req.query.page) || 1;
+const getProducts = asyncHandler(async (req, res) => {
+  const pageSize = 12;
+  const page = Number(req.query.page) || 1;
 
-    const keyword = req.query.keyword ? {name:{$regex:req.query.keyword,$options:"i"}}:{};
+  const keyword = req.query.keyword
+    ? { name: { $regex: req.query.keyword, $options: "i" } }
+    : {};
 
-    const category = req.query.category ? {category: req.query.category}:{};
+  const category = req.query.category ? { category: req.query.category } : {};
 
-    const count = await Product.countDocuments({...keyword,...category});
+  // Price range filter — naya
+  const priceFilter = {};
+  if (req.query.minPrice) {
+    priceFilter.$gte = Number(req.query.minPrice);
+  }
+  if (req.query.maxPrice) {
+    priceFilter.$lte = Number(req.query.maxPrice);
+  }
+  const price = Object.keys(priceFilter).length > 0 ? { price: priceFilter } : {};
 
-    const products = await Product.find({...keyword, ...category})
+  const filters = { ...keyword, ...category, ...price };
+
+  const count = await Product.countDocuments(filters);
+  const products = await Product.find(filters)
     .limit(pageSize)
-    .skip(pageSize*(page-1))
-    .sort({createdAt:-1});
+    .skip(pageSize * (page - 1))
+    .sort({ createdAt: -1 });
 
-    res.status(200).json({
-        products,
-        page,
-        pages:Math.ceil(count/pageSize),
-        total:count,
-    });
+  res.status(200).json({
+    products,
+    page,
+    pages: Math.ceil(count / pageSize),
+    total: count,
+  });
 });
 
 const getProductById = asyncHandler(async (req, res) => {
