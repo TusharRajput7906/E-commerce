@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import api from "../services/api";
+import { addToCart } from "../redux/cartSlice";
+import { toast } from "react-toastify";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -8,6 +11,10 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [qty, setQty] = useState(1);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { loading: cartLoading } = useSelector((state) => state.cart || { loading: false });
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -32,8 +39,18 @@ const ProductDetails = () => {
 
   const maxQty = product.stock || 0;
 
-  const handleAddToCart = () => {
-    console.log('Add to cart:', { productId: product._id, quantity: qty });
+  const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    try {
+      await dispatch(addToCart({ productId: product._id, quantity: qty })).unwrap();
+      toast.success('Added to cart');
+    } catch (err) {
+      console.error(err);
+      toast.error(err || 'Failed to add to cart');
+    }
   };
 
   return (
@@ -82,10 +99,10 @@ const ProductDetails = () => {
           <div>
             <button
               onClick={handleAddToCart}
-              disabled={product.stock === 0}
+              disabled={product.stock === 0 || cartLoading}
               className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
             >
-              Add to Cart
+              {cartLoading ? 'Adding...' : 'Add to Cart'}
             </button>
           </div>
         </div>

@@ -66,4 +66,14 @@ const logoutUser = async (req,res)=> {
     res.status(200).json({message:"Logout out successfully"});
 };
 
-module.exports = {registerUser,loginUser,logoutUser};
+// @desc    Get current authenticated user
+// @route   GET /api/auth/me
+const getMe = async (req, res) => {
+    // `protect` middleware attaches `req.user` (without password)
+    if (!req.user) {
+        return res.status(401).json({ message: "Not authenticated" });
+    }
+    res.status(200).json(req.user);
+};
+
+module.exports = {registerUser,loginUser,logoutUser,getMe};

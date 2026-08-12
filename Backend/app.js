@@ -11,8 +11,9 @@ const orderRoutes = require("./Routes/orderRoutes");
 const app=express();
 
 app.use(express.json());
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
 app.use(cors({
-    origin:"http://localhost:5173",
+    origin: allowedOrigins,
     credentials:true
 }));
 
