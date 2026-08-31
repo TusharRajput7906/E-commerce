@@ -23,6 +23,12 @@ const ProductForm = () => {
       setLoading(true);
       try {
         const { data } = await api.get(`/products/${id}`);
+        const imageUrl = Array.isArray(data.image)
+          ? data.image[0]?.url || ''
+          : typeof data.image === 'string'
+          ? data.image
+          : (Array.isArray(data.images) ? data.images[0]?.url || '' : '');
+
         setForm({
           name: data.name || '',
           description: data.description || '',
@@ -30,7 +36,7 @@ const ProductForm = () => {
           category: data.category || '',
           brand: data.brand || '',
           stock: data.countInStock ?? data.stock ?? 0,
-          image: data.image || '',
+          image: imageUrl,
         });
       } catch (err) {
         console.error(err);

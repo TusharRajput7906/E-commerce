@@ -6,30 +6,33 @@ const ORDER_STATUSES = ['Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const { data } = await api.get('/orders');
-      setOrders(data);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to load orders');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    let ignore = false;
+    const load = async () => {
+      try {
+        const { data } = await api.get('/orders');
+        if (!ignore) setOrders(data);
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to load orders');
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, [refreshKey]);
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       await api.put(`/orders/${orderId}/status`, { orderStatus: newStatus });
       toast.success('Order updated');
-      fetchOrders();
+      setRefreshKey((prev) => prev + 1);
     } catch (err) {
       console.error(err);
       toast.error('Update failed');
@@ -57,7 +60,7 @@ const AdminOrders = () => {
               <tr key={o._id}>
                 <td className="px-4 py-2 border">{o._id}</td>
                 <td className="px-4 py-2 border">{o.user?.name || o.user?.email || '—'}</td>
-                <td className="px-4 py-2 border">${o.totalPrice}</td>
+                <td className="px-4 py-2 border">₹{o.totalPrice}</td>
                 <td className="px-4 py-2 border">{o.orderStatus}</td>
                 <td className="px-4 py-2 border">
                   <select value={o.orderStatus} onChange={(e) => handleStatusChange(o._id, e.target.value)} className="border p-1">

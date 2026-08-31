@@ -8,12 +8,12 @@ const cartRoutes = require("./Routes/cartRoutes");
 const orderRoutes = require("./Routes/orderRoutes");
 
 
-const app=express();
+const app = express();
 
 app.use(express.json());
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5174",process.env.FRONTEND_URL];
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5174", process.env.FRONTEND_URL];
 app.use(cors({
-    origin: function (origin, callback) {
+  origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -25,14 +25,14 @@ app.use(cors({
 
 app.use(cookieParser());
 
-app.use("/api/auth",authRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 
 
-app.get("/api/health",(req,res)=>{
-    res.status(200).json({message:"Server is Running fine"});
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ message: "Server is Running fine" });
 });
 
 app.use(notFound);

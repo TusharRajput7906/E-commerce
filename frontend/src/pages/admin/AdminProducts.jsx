@@ -5,34 +5,36 @@ import { toast } from 'react-toastify';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
 
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      const { data } = await api.get('/products');
-      // API returns { products, page, pages, total } — normalize to array
-      const list = data?.products ?? data;
-      setProducts(Array.isArray(list) ? list : []);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to load products');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    let ignore = false;
+    const load = async () => {
+      try {
+        const { data } = await api.get('/products');
+        const list = data?.products ?? data;
+        if (!ignore) setProducts(Array.isArray(list) ? list : []);
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to load products');
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, [refreshKey]);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this product?')) return;
     try {
       await api.delete(`/products/${id}`);
       toast.success('Product deleted');
-      fetchProducts();
+      setRefreshKey((prev) => prev + 1);
     } catch (err) {
       console.error(err);
       toast.error('Delete failed');
@@ -64,7 +66,7 @@ const AdminProducts = () => {
             {products.map((p) => (
               <tr key={p._id}>
                 <td className="px-4 py-2 border">{p.name}</td>
-                <td className="px-4 py-2 border">${p.price}</td>
+                <td className="px-4 py-2 border">₹{p.price}</td>
                 <td className="px-4 py-2 border">{p.category}</td>
                 <td className="px-4 py-2 border">{p.brand}</td>
                 <td className="px-4 py-2 border">{p.countInStock ?? p.stock ?? 0}</td>

@@ -7,7 +7,7 @@ const asyncHandler = require("../Middleware/asyncHandler");
 const getCart = asyncHandler(async (req, res) => {
   let cart = await Cart.findOne({ user: req.user._id }).populate(
     "items.product",
-    "name price images stock",
+    "name price image images stock",
   );
 
   if (!cart) {
@@ -55,7 +55,7 @@ const addToCart = asyncHandler(async (req, res) => {
 
   const populatedCart = await cart.populate(
     "items.product",
-    "name price images stock",
+    "name price image images stock",
   );
   res.status(200).json(populatedCart);
 });
@@ -85,7 +85,7 @@ const updateCartItem = asyncHandler(async (req, res) => {
   item.quantity = quantity;
   await cart.save();
 
-  const populatedCart = await cart.populate("items.product", "name price images stock");
+  const populatedCart = await cart.populate("items.product", "name price image images stock");
   res.status(200).json(populatedCart);
 });
 
@@ -103,7 +103,7 @@ const removeFromCart = asyncHandler(async (req, res) => {
   cart.items = cart.items.filter((item) => item.product.toString() !== productId);
   await cart.save();
 
-  const populatedCart = await cart.populate("items.product", "name price images stock");
+  const populatedCart = await cart.populate("items.product", "name price image images stock");
   res.status(200).json(populatedCart);
 });
 

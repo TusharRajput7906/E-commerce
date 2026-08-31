@@ -29,7 +29,7 @@ const App = () => {
       try {
         const { data } = await api.get('/auth/me');
         if (data) dispatch(setCredentials(data));
-      } catch (err) {
+      } catch {
         // ignore (not authenticated)
       }
     };

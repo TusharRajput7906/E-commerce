@@ -3,7 +3,7 @@ const asyncHandler = require("../Middleware/asyncHandler");
 
 
 const createProduct = asyncHandler(async (req,res)=>{
-    const {name,description,price, category,brand,stock,images} = req.body;
+    const {name,description,price, category,brand,stock,images,image} = req.body;
     const product = await Product.create({
         name,
         description,
@@ -11,7 +11,7 @@ const createProduct = asyncHandler(async (req,res)=>{
         category,
         brand,
         stock,
-        images,
+        image: image || images || [],
         user:req.user._id,
     });
 

@@ -22,19 +22,12 @@ const ProductFilters = () => {
         const unique = Array.from(new Set(list.map((p) => p.category).filter(Boolean)));
         if (unique.length > 0) setCategories(unique);
         else setCategories(DEFAULT_CATEGORIES);
-      } catch (err) {
+      } catch {
         setCategories(DEFAULT_CATEGORIES);
       }
     };
     load();
   }, []);
-
-  // sync when user navigates (URL changes externally)
-  useEffect(() => {
-    setCategory(searchParams.get('category') || '');
-    setMinPrice(searchParams.get('minPrice') || '');
-    setMaxPrice(searchParams.get('maxPrice') || '');
-  }, [searchParams]);
 
   const apply = (e) => {
     if (e) e.preventDefault();
@@ -53,13 +46,15 @@ const ProductFilters = () => {
   const clear = () => {
     const params = {};
     const kw = searchParams.get('keyword');
-    if (kw) params.keyword = kw; // keep keyword when clearing filters per spec? spec said Clear Filters resets category and price — keep keyword
+    if (kw) params.keyword = kw; // keep keyword when clearing filters per spec
     setSearchParams(params);
   };
 
+  const formKey = `${searchParams.get('category') || ''}_${searchParams.get('minPrice') || ''}_${searchParams.get('maxPrice') || ''}`;
+
   return (
     <aside className="w-full md:w-64 bg-white md:bg-transparent p-4 md:p-0">
-      <form onSubmit={apply} className="space-y-4">
+      <form key={formKey} onSubmit={apply} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
           <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full border rounded px-2 py-1">
