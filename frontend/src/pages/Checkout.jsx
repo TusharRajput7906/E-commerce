@@ -21,17 +21,19 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const validItems = Array.isArray(items) ? items.filter((it) => it && it.product) : [];
+
   useEffect(() => {
     if (!isAuthenticated) navigate("/login");
   }, [isAuthenticated, navigate]);
 
   useEffect(() => {
-    if (!items || items.length === 0) {
+    if (validItems.length === 0) {
       navigate("/cart");
     }
-  }, [items, navigate]);
+  }, [validItems.length, navigate]);
 
-  const subtotal = items.reduce((sum, it) => sum + it.product.price * it.quantity, 0);
+  const subtotal = validItems.reduce((sum, it) => sum + ((it.product?.price || 0) * (it.quantity || 1)), 0);
   const shipping = subtotal > 500 ? 0 : 50;
   const total = subtotal + shipping;
 
@@ -107,16 +109,16 @@ const Checkout = () => {
           </div>
 
           <h2 className="font-semibold mt-4">Payment Method</h2>
-          <div className="space-y-2">
-            <label className="flex items-center gap-2">
-              <input type="radio" name="payment" value="COD" checked={paymentMethod==="COD"} onChange={()=>setPaymentMethod("COD")} /> COD
-            </label>
-            <label className="flex items-center gap-2">
-              <input type="radio" name="payment" value="Card" checked={paymentMethod==="Card"} onChange={()=>setPaymentMethod("Card")} /> Card
-            </label>
-            <label className="flex items-center gap-2">
-              <input type="radio" name="payment" value="UPI" checked={paymentMethod==="UPI"} onChange={()=>setPaymentMethod("UPI")} /> UPI
-            </label>
+          <div className="p-3 border rounded bg-gray-50 flex items-center gap-2">
+            <input
+              type="radio"
+              name="payment"
+              value="COD"
+              checked={true}
+              readOnly
+              className="accent-gray-900"
+            />
+            <span className="font-medium text-gray-800">Cash on Delivery (COD)</span>
           </div>
 
           <button disabled={loading} className="mt-4 bg-gray-900 text-white py-2 px-4 rounded">
@@ -127,13 +129,13 @@ const Checkout = () => {
         <aside className="border rounded p-4">
           <h2 className="font-semibold">Order Summary</h2>
           <div className="mt-4 space-y-3">
-            {items.map((it) => (
-              <div key={it._id} className="flex justify-between">
+            {validItems.map((it) => (
+              <div key={it._id || it.product?._id} className="flex justify-between">
                 <div>
-                  <div className="font-medium">{it.product.name} x {it.quantity}</div>
-                  <div className="text-sm text-gray-500">₹{it.product.price} each</div>
+                  <div className="font-medium">{it.product?.name} x {it.quantity}</div>
+                  <div className="text-sm text-gray-500">₹{it.product?.price} each</div>
                 </div>
-                <div className="font-semibold">₹{it.product.price * it.quantity}</div>
+                <div className="font-semibold">₹{(it.product?.price || 0) * (it.quantity || 1)}</div>
               </div>
             ))}
           </div>

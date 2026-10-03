@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import ProductFilters from "../components/ProductFilters";
+import { getProductImageUrl } from "../utils/imageHelper";
 
 const Home = () => {
     const [products, setProducts] = useState([]);
@@ -60,7 +61,7 @@ const Home = () => {
                                     return (
                                         <Link key={product._id} to={`/product/${product._id}`} className="block">
                                             <div className="border rounded-lg p-4 shadow hover:shadow-lg transition h-full">
-                                                <img src={product.image?.[0]?.url} alt={product.name} className="w-full h-48 object-cover mb-3" />
+                                                <img src={getProductImageUrl(product)} alt={product.name} className="w-full h-48 object-cover mb-3 rounded" />
 
                                                 <h2 className="font-semibold text-lg">{product.name}</h2>
                                                 <p className="text-gray-500 text-sm">{product.category}</p>

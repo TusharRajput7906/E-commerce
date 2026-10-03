@@ -20,7 +20,8 @@ const errorHandler = (err,req,res,next)=>{
 
     if(err.code === 11000){
         statusCode=400;
-        const field = Object.keys(err.keyValue)[0];
+        const fieldObj = err.keyValue || err.keyPattern || {};
+        const field = Object.keys(fieldObj)[0] || "Field";
         message=`${field} already exists`;
     }
 

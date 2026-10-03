@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import api from "../services/api";
 import { addToCart } from "../redux/cartSlice";
 import { toast } from "react-toastify";
+import { getProductImageUrl } from "../utils/imageHelper";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -58,7 +59,7 @@ const ProductDetails = () => {
       <div className="max-w-6xl mx-auto bg-white rounded shadow p-6 flex flex-col md:flex-row gap-6">
         <div className="md:w-1/2">
           <img
-            src={product.image?.[0]?.url}
+            src={getProductImageUrl(product)}
             alt={product.name}
             className="w-full h-96 object-cover rounded"
           />

@@ -30,21 +30,23 @@ const OrderSuccess = () => {
       <h1 className="text-2xl font-semibold mb-4">Order Confirmation</h1>
       <p className="mb-2">Thank you! Your order <span className="font-semibold">{order._id}</span> has been placed.</p>
 
-      <div className="border rounded p-4 mt-4">
-        <h2 className="font-semibold">Shipping Address</h2>
-        <p>{order.shippingAddress.fullName}</p>
-        <p>{order.shippingAddress.address}, {order.shippingAddress.city} - {order.shippingAddress.postalCode}</p>
-        <p>{order.shippingAddress.country}</p>
-        <p>Phone: {order.shippingAddress.phone}</p>
-      </div>
+      {order.shippingAddress && (
+        <div className="border rounded p-4 mt-4">
+          <h2 className="font-semibold">Shipping Address</h2>
+          <p>{order.shippingAddress.fullName}</p>
+          <p>{order.shippingAddress.address}, {order.shippingAddress.city} - {order.shippingAddress.postalCode}</p>
+          <p>{order.shippingAddress.country}</p>
+          <p>Phone: {order.shippingAddress.phone}</p>
+        </div>
+      )}
 
       <div className="border rounded p-4 mt-4">
         <h2 className="font-semibold">Items</h2>
         <div className="mt-2 space-y-2">
-          {order.items.map((it) => (
-            <div key={it.product} className="flex justify-between">
+          {order.items?.map((it, idx) => (
+            <div key={it._id || it.product || idx} className="flex justify-between">
               <div>{it.name} x {it.quantity}</div>
-              <div>₹{it.price * it.quantity}</div>
+              <div>₹{(it.price || 0) * (it.quantity || 1)}</div>
             </div>
           ))}
         </div>

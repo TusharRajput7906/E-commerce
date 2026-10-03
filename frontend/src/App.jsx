@@ -17,7 +17,8 @@ import ProductForm from './pages/admin/ProductForm'
 import AdminOrders from './pages/admin/AdminOrders'
 import { useDispatch } from 'react-redux'
 import api from './services/api'
-import { setCredentials } from './redux/authSlice'
+import { setCredentials, setAuthChecked } from './redux/authSlice'
+import { fetchCart } from './redux/cartSlice'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -28,9 +29,14 @@ const App = () => {
     const restoreAuth = async () => {
       try {
         const { data } = await api.get('/auth/me');
-        if (data) dispatch(setCredentials(data));
+        if (data) {
+          dispatch(setCredentials(data));
+          dispatch(fetchCart());
+        } else {
+          dispatch(setAuthChecked());
+        }
       } catch {
-        // ignore (not authenticated)
+        dispatch(setAuthChecked());
       }
     };
     restoreAuth();

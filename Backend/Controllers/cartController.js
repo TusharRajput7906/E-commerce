@@ -12,6 +12,13 @@ const getCart = asyncHandler(async (req, res) => {
 
   if (!cart) {
     cart = await Cart.create({ user: req.user._id, items: [] });
+  } else {
+    // Clean up items whose product was removed from the database
+    const initialLength = cart.items.length;
+    cart.items = cart.items.filter((item) => item.product !== null);
+    if (cart.items.length !== initialLength) {
+      await cart.save();
+    }
   }
 
   res.status(200).json(cart);
@@ -45,6 +52,10 @@ const addToCart = asyncHandler(async (req, res) => {
       (item) => item.product.toString() === productId,
     );
     if (itemIndex > -1) {
+      if (cart.items[itemIndex].quantity + quantity > product.stock) {
+        res.status(400);
+        throw new Error(`Cannot add more than available stock (${product.stock})`);
+      }
       cart.items[itemIndex].quantity += quantity;
     } else {
       cart.items.push({ product: productId, quantity });
@@ -57,6 +68,7 @@ const addToCart = asyncHandler(async (req, res) => {
     "items.product",
     "name price image images stock",
   );
+  populatedCart.items = populatedCart.items.filter((item) => item.product !== null);
   res.status(200).json(populatedCart);
 });
 

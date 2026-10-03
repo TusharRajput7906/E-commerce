@@ -17,6 +17,10 @@ const createOrder = asyncHandler(async (req, res) => {
 
   // Stock check karo har item ke liye pehle
   for (const item of cart.items) {
+    if (!item.product) {
+      res.status(400);
+      throw new Error("One or more items in your cart are no longer available");
+    }
     if (item.product.stock < item.quantity) {
       res.status(400);
       throw new Error(`Not enough stock for ${item.product.name}`);
@@ -47,9 +51,11 @@ const createOrder = asyncHandler(async (req, res) => {
 
   // Stock kam karo har product ka
   for (const item of cart.items) {
-    await Product.findByIdAndUpdate(item.product._id, {
-      $inc: { stock: -item.quantity }, // stock se quantity minus karo
-    });
+    if (item.product && item.product._id) {
+      await Product.findByIdAndUpdate(item.product._id, {
+        $inc: { stock: -item.quantity }, // stock se quantity minus karo
+      });
+    }
   }
 
   // Cart khaali karo checkout ke baad
@@ -77,7 +83,8 @@ const getOrderById = asyncHandler(async (req, res) => {
   }
 
   // Check karo ye order isi user ka hai, ya admin hai
-  if (order.user._id.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+  const orderUserId = order.user?._id ? order.user._id.toString() : (order.user ? order.user.toString() : null);
+  if (orderUserId !== req.user._id.toString() && req.user.role !== "admin") {
     res.status(403);
     throw new Error("Not authorized to view this order");
   }
